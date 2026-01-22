@@ -12,14 +12,18 @@ COPY --from=prepare /app/out/pnpm-lock.yaml .
 RUN pnpm install --no-frozen-lockfile
 COPY --from=prepare /app/out/full/ .
 WORKDIR /app/apps/web
-RUN pnpm build  # Assumes "build": "next build" in package.json
+RUN pnpm build
+
+# Deploy stage: create standalone folder with resolved prod deps
+FROM base AS deployer
+COPY --from=builder /app /app-full
+WORKDIR /app-full
+# Important: run from root + --filter to select the web package
+RUN pnpm deploy --filter=web --prod /app-deploy
 
 FROM base AS runner
 WORKDIR /app
-COPY --from=builder /app/apps/web/.next ./.next
-COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/next.config.js .
-COPY --from=builder /app/apps/web/package.json .
-RUN pnpm install --prod --no-frozen-lockfile
+COPY --from=deployer /app-deploy ./
 EXPOSE 3000
-CMD ["pnpm", "start"]  # Assumes "start": "next start" in package.json
+ENV NODE_ENV=production
+CMD ["pnpm", "start"]
