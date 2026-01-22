@@ -1,29 +1,21 @@
-FROM node:22.18-alpine
-
+FROM node:22.18-alpine AS base
 WORKDIR /app
+RUN npm install -g pnpm turbo
 
-RUN npm install -g pnpm
+FROM base AS prepare
+COPY . .
+RUN turbo prune price-poller-service --docker
 
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-
-COPY packages/redis/package.json ./packages/redis/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
-COPY packages/types/package.json ./packages/types/
-COPY apps/price-poller-service/package.json ./apps/price-poller-service/
-
+FROM base AS builder
+COPY --from=prepare /app/out/json/ .
+COPY --from=prepare /app/out/pnpm-lock.yaml .
 RUN pnpm install --no-frozen-lockfile
-
-COPY packages/redis/index.ts ./packages/redis/
-COPY packages/redis/tsconfig.json ./packages/redis/
-COPY packages/typescript-config/ ./packages/typescript-config/
-COPY packages/types/src ./packages/types/src
-COPY packages/types/tsconfig.json ./packages/types/
-COPY apps/price-poller-service/src ./apps/price-poller-service/src
-COPY apps/price-poller-service/tsconfig.json ./apps/price-poller-service/
-
+COPY --from=prepare /app/out/full/ .
 WORKDIR /app/apps/price-poller-service
 RUN npx tsc -b
 
+FROM base AS runner
+WORKDIR /app
+COPY --from=builder /app/apps/price-poller-service/dist/ .
 EXPOSE 3003
-
 CMD ["node", "dist/index.js"]

@@ -1,38 +1,24 @@
-FROM node:22.18-alpine
-
+FROM node:22.18-alpine AS base
 WORKDIR /app
+RUN npm install -g pnpm turbo
 
-RUN npm install -g pnpm
+FROM base AS prepare
+COPY . .
+RUN turbo prune engine-service --docker
 
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-
-COPY packages/redis/package.json ./packages/redis/
-COPY packages/typescript-config/package.json ./packages/typescript-config/
-COPY packages/types/package.json ./packages/types/
-COPY packages/prisma/package.json ./packages/prisma/
-COPY apps/engine-service/package.json ./apps/engine-service/
-
+FROM base AS builder
+COPY --from=prepare /app/out/json/ .
+COPY --from=prepare /app/out/pnpm-lock.yaml .
 RUN pnpm install --no-frozen-lockfile
-
-COPY packages/redis/index.ts ./packages/redis/
-COPY packages/redis/tsconfig.json ./packages/redis/
-COPY packages/typescript-config/ ./packages/typescript-config/
-COPY packages/types/src ./packages/types/src
-COPY packages/types/tsconfig.json ./packages/types/
-COPY apps/engine-service/src ./apps/engine-service/src
-COPY apps/engine-service/tsconfig.json ./apps/engine-service/
-
-COPY packages/prisma/prisma ./packages/prisma/prisma
-COPY packages/prisma/index.ts ./packages/prisma/
-COPY packages/prisma/tsconfig.json ./packages/prisma/
-
+COPY --from=prepare /app/out/full/ .
 WORKDIR /app/packages/prisma
 RUN npx prisma generate
 RUN npx tsc -b
-
 WORKDIR /app/apps/engine-service
 RUN npx tsc -b
 
+FROM base AS runner
+WORKDIR /app
+COPY --from=builder /app/apps/engine-service/dist/ .
 EXPOSE 3002
-
 CMD ["node", "dist/index.js"]
