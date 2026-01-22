@@ -1,8 +1,7 @@
 import axios from "axios";
 import { queryClient } from "./queryClient";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://api.100xness.ashishmohapatra.in";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -28,7 +27,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 axiosInstance.interceptors.response.use(
@@ -42,7 +41,7 @@ axiosInstance.interceptors.response.use(
       typeof originalRequest?.url === "string" ? originalRequest.url : "";
     const public401SafePaths = ["/candles", "/auth/me"];
     const isPublicPath = public401SafePaths.some((p) =>
-      requestUrl.startsWith(p)
+      requestUrl.startsWith(p),
     );
 
     const isAuthPage =
@@ -51,8 +50,7 @@ axiosInstance.interceptors.response.use(
         window.location.pathname.includes("/register"));
 
     const isHomePage =
-      typeof window !== "undefined" &&
-      window.location.pathname === "/";
+      typeof window !== "undefined" && window.location.pathname === "/";
 
     if (
       error.response?.status === 401 &&
@@ -70,7 +68,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;

@@ -2,8 +2,8 @@
   "extends": "@repo/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "ES2022",
     "esModuleInterop": true,
     "skipLibCheck": true
