@@ -1,21 +1,30 @@
+# Stage 1: Base (Shared by builder and runner)
 FROM node:22.18-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN npm install -g pnpm@9
 WORKDIR /app
-RUN npm install -g pnpm turbo
-
-FROM base AS prepare
-COPY . .
-RUN turbo prune price-poller-service --docker
 
 FROM base AS builder
-COPY --from=prepare /app/out/json/ .
-COPY --from=prepare /app/out/pnpm-lock.yaml .
-RUN pnpm install --no-frozen-lockfile
-COPY --from=prepare /app/out/full/ .
-WORKDIR /app/apps/price-poller-service
-RUN npx tsc -b
+RUN pnpm add -g turbo@2
+COPY . .
+
+RUN pnpm install --frozen-lockfile
+
+RUN cd packages/prisma && DATABASE_URL="postgresql://dummy:5432" pnpm prisma generate
+
+RUN turbo run build --filter=api-service
+
+RUN pnpm --filter=api-service --prod deploy /app/deployed
 
 FROM base AS runner
+RUN addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001
+USER nextjs
+
+COPY --from=builder /app/deployed /app
+
 WORKDIR /app
-COPY --from=builder /app/apps/price-poller-service/dist/ .
-EXPOSE 3003
+EXPOSE 3001
+ENV NODE_ENV=production
+
 CMD ["node", "dist/index.js"]
