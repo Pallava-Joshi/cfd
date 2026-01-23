@@ -9,21 +9,22 @@ RUN turbo prune web --docker
 FROM base AS builder
 COPY --from=prepare /app/out/json/ .
 COPY --from=prepare /app/out/pnpm-lock.yaml .
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
+
 COPY --from=prepare /app/out/full/ .
 WORKDIR /app/apps/web
 RUN pnpm build
 
-# Deploy stage: create standalone folder with resolved prod deps
-FROM base AS deployer
-COPY --from=builder /app /app-full
-WORKDIR /app-full
-# Important: run from root + --filter to select the web package
-RUN pnpm deploy --filter=web --prod /app-deploy
-
 FROM base AS runner
 WORKDIR /app
-COPY --from=deployer /app-deploy ./
+
+# Copy the standalone output
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+
 EXPOSE 3000
 ENV NODE_ENV=production
-CMD ["pnpm", "start"]
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "apps/web/server.js"]
