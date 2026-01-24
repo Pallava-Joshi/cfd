@@ -8,13 +8,18 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write      # Required to push to GHCR
+      contents: read
+
     strategy:
       matrix:
-        service: 
+        service:
           - api-service
           - engine-service
           - price-poller-service
           - web
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,9 +32,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push ${{ matrix.service }}
-        run: |
-          docker build \
-            -f apps/${{ matrix.service }}/Dockerfile \
-            -t ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.ref_name }} \
-            .
-          docker push ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.ref_name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.service }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}/${{ matrix.service }}:latest
