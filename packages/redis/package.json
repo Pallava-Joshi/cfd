@@ -10,7 +10,10 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "package.json"],
+  "files": [
+    "dist",
+    "package.json"
+  ],
   "scripts": {
     "build": "tsc -b"
   },
@@ -22,6 +25,8 @@
     "@repo/typescript-config": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3"
+    "@types/node": "^22.15.3",
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "^5.0.0"
   }
 }

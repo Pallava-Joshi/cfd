@@ -1,30 +1,53 @@
-# Stage 1: Base (Shared by builder and runner)
 FROM node:22.18-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN npm install -g pnpm@9
 WORKDIR /app
+RUN npm install -g pnpm@9 turbo@2
+
+FROM base AS prepare
+COPY . .
+RUN turbo prune price-poller-service --docker
+
 
 FROM base AS builder
-RUN pnpm add -g turbo@2
-COPY . .
+WORKDIR /app
 
+COPY --from=prepare /app/out/json/ .
+COPY --from=prepare /app/out/pnpm-lock.yaml .
 RUN pnpm install --frozen-lockfile
 
-RUN cd packages/prisma && DATABASE_URL="postgresql://dummy:5432" pnpm prisma generate
+COPY --from=prepare /app/out/full/ .
 
-RUN turbo run build --filter=api-service
+# Build the service (Triple dots include local workspace deps like @repo/redis)
+RUN pnpm turbo run build --filter=price-poller-service...
 
-RUN pnpm --filter=api-service --prod deploy /app/deployed
 
 FROM base AS runner
-RUN addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001
-USER nextjs
-
-COPY --from=builder /app/deployed /app
-
 WORKDIR /app
-EXPOSE 3001
+
+# Minimal workspace metadata
+COPY --from=prepare /app/out/json/ .
+COPY --from=prepare /app/out/pnpm-lock.yaml .
+
+# Copy packages (excluding Prisma since we don't need it)
+COPY --from=builder /app/packages ./packages
+
+# Install production deps only
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy built app files
+COPY --from=builder /app/apps/price-poller-service/dist ./apps/price-poller-service/dist
+COPY --from=builder /app/apps/price-poller-service/package.json ./apps/price-poller-service/package.json
+
+# Non-root user
+RUN addgroup -S nodejs -g 1001 && \
+    adduser -S polleruser -u 1001 -G nodejs && \
+    chown -R polleruser:nodejs /app
+
+USER polleruser
+
 ENV NODE_ENV=production
+ENV PORT=3003
+
+WORKDIR /app/apps/price-poller-service
+EXPOSE 3003
 
 CMD ["node", "dist/index.js"]
