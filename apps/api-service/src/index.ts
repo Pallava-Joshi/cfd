@@ -12,31 +12,11 @@ import candlesRouter from "./routes/candles.route";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3200",
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "https://exness.vibingmonk.in",
-      "https://www.exness.vibingmonk.in",
-      "http://exness.vibingmonk.in",
-      "http://www.exness.vibingmonk.in",
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "Cookie",
-      "X-Requested-With"
-    ]
-  })
-);
+app.use(cors());
 
 app.use((req, res, next) => {
   console.log(
-    `${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get("origin")}`
+    `${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get("origin")}`,
   );
   next();
 });
@@ -58,7 +38,7 @@ app.use(
     err: any,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    next: express.NextFunction,
   ) => {
     console.error("Error occurred:", err);
     res.status(500).json({
@@ -68,7 +48,7 @@ app.use(
           ? err.message
           : "Something went wrong",
     });
-  }
+  },
 );
 
 app.listen(PORT, () => {
