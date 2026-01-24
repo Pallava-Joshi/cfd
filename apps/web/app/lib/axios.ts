@@ -1,7 +1,8 @@
 import axios from "axios";
 import { queryClient } from "./queryClient";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = "https://exness.vibingmonk.in/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

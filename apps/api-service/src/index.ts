@@ -24,14 +24,14 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/health", (req, res) => {
+app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
-app.use("/trade", tradeRouter);
-app.use("/auth", authRouter);
-app.use("/balance", balanceRouter);
-app.use("/candles", candlesRouter);
+app.use("/api/trade", tradeRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/balance", balanceRouter);
+app.use("/api/candles", candlesRouter);
 
 app.use(
   (
