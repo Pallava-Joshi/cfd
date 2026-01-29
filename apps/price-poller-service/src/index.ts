@@ -1,10 +1,25 @@
+import http from "http";
 import { WebSocket } from "ws";
 import { redis } from "@repo/redis";
 
+const PORT = Number(process.env.PORT) || 3003;
+
+// Minimal HTTP server for K8s liveness/readiness probes
+const server = http.createServer((req, res) => {
+  if (req.url === "/health" && req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok" }));
+    return;
+  }
+  res.writeHead(404);
+  res.end();
+});
+server.listen(PORT, () => {
+  console.log(`Starting Price Poller service on port ${PORT}`);
+});
+
 const url = "wss://ws.backpack.exchange";
 const ws = new WebSocket(url);
-
-console.log("Starting Price Poller service on port 3003");
 
 redis.on("connect", () => {
   console.log("connected to redis");
