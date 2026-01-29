@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SiBitcoin } from "react-icons/si";
 import { SiTether } from "react-icons/si";
+import { Button } from "../components/ui/button";
 import {
   createChart,
   CrosshairMode,
@@ -35,7 +36,8 @@ const Marketplace = () => {
   const totalBalance =
     balanceData?.balances?.reduce((total, balance) => {
       if (balance.symbol === "USDC") {
-        const balanceInDollars = balance.balance / Math.pow(10, balance.decimals);
+        const balanceInDollars =
+          balance.balance / Math.pow(10, balance.decimals);
         return total + balanceInDollars;
       }
       return total;
@@ -45,7 +47,7 @@ const Marketplace = () => {
     selectedInterval,
     0,
     0,
-    "BTC_USDC"
+    "BTC_USDC",
   );
 
   useEffect(() => {
@@ -178,23 +180,17 @@ const Marketplace = () => {
   }, [data, isLoading, isError]);
 
   return (
-    <div className="w-full h-screen bg-white flex flex-col">
-      <header className="bg-white border-b border-gray-200 px-4 py-2 md:px-6 lg:px-4 flex-shrink-0">
-        <div className="mx-auto">
-          <div className="flex items-center justify-between mb-4 md:mb-0">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-black rounded-full"></div>
-              <h1 className="text-xl font-semibold text-black font-ibm-plex-mono">
-                100xness
-              </h1>
-            </div>
-
+    <div className="w-full h-screen flex flex-col">
+      <header className="w-full border-b border-[var(--border)] px-3 py-2 sm:px-4 md:px-6 flex-shrink-0 bg-[#FFF]">
+        <div className="mx-auto max-w-[1260px]">
+          <div className="flex items-center justify-end mb-4 md:mb-0">
             <button
-              className="md:hidden p-2 text-gray-600 hover:text-black"
+              className="md:hidden p-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              type="button"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5 sm:w-6 sm:h-6"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -210,43 +206,28 @@ const Marketplace = () => {
           </div>
 
           <div className="hidden md:flex md:items-center md:justify-between">
-            <div className="flex items-center gap-6 lg:gap-8">
-              <nav className="flex items-center gap-6 lg:gap-8">
-                <Link
-                  href="/"
-                  className="text-gray-600 hover:text-black transition-colors font-instrument-sans"
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/docs"
-                  className="text-gray-600 hover:text-black transition-colors font-instrument-sans"
-                >
-                  Docs
-                </Link>
-                <Link
-                  href="/marketplace"
-                  className="text-black font-semibold font-instrument-sans"
-                >
-                  Marketplace
-                </Link>
-              </nav>
-
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-4 sm:gap-6 lg:gap-8">
+              <div className="flex items-center gap-1.5 sm:gap-2 bg-gray-50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-[var(--border)]">
                 <div className="flex items-center gap-1">
-                  <SiBitcoin className="w-5 h-5 text-orange-500" />
-                  <span className="font-semibold text-black font-ibm-plex-mono">BTC</span>
+                  <SiBitcoin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <span className="font-semibold text-black font-ibm-plex-mono text-xs sm:text-sm md:text-base">
+                    BTC
+                  </span>
                 </div>
-                <span className="text-gray-400">/</span>
+                <span className="text-gray-400 text-xs sm:text-sm">/</span>
                 <div className="flex items-center gap-1">
-                  <SiTether className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold text-black font-ibm-plex-mono">USDT</span>
+                  <SiTether className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <span className="font-semibold text-black font-ibm-plex-mono text-xs sm:text-sm md:text-base">
+                    USDT
+                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 lg:gap-6 pl-6 lg:pl-8 border-l border-gray-300">
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-600">Timeframe:</span>
+              <div className="flex items-center gap-2 sm:gap-4 lg:gap-6 pl-4 sm:pl-6 lg:pl-8 border-l border-[var(--border)]">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="text-xs sm:text-sm text-[var(--muted-foreground)]">
+                    Timeframe:
+                  </span>
                   <IntervalSelector
                     selectedInterval={selectedInterval}
                     onIntervalChange={setSelectedInterval}
@@ -255,65 +236,47 @@ const Marketplace = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 lg:gap-6">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Balance:</span>
-                <span className="text-lg font-semibold text-black font-ibm-plex-mono">
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="text-xs sm:text-sm text-[var(--muted-foreground)]">
+                  Balance:
+                </span>
+                <span className="text-sm sm:text-base md:text-lg font-semibold text-black font-ibm-plex-mono">
                   {balanceLoading
                     ? "Loading..."
                     : `$${totalBalance.toLocaleString()}`}
                 </span>
               </div>
-              <button
-                onClick={() => setIsDepositModalOpen(true)}
-                className="bg-black text-white text-sm px-6 py-2 rounded-4xl font-medium transition-colors hover:bg-gray-800 cursor-pointer"
-              >
+              <Button size="sm" onClick={() => setIsDepositModalOpen(true)} className="text-xs sm:text-sm px-2 sm:px-4">
                 Deposit
-              </button>
+              </Button>
             </div>
           </div>
 
           <div className={`md:hidden ${mobileMenuOpen ? "block" : "hidden"}`}>
-            <div className="space-y-4 pt-4 border-t border-gray-200">
-              <nav className="flex flex-col gap-3 pb-4 border-b border-gray-200">
-                <Link
-                  href="/"
-                  className="text-gray-600 hover:text-black transition-colors font-instrument-sans"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/docs"
-                  className="text-gray-600 hover:text-black transition-colors font-instrument-sans"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Docs
-                </Link>
-                <Link
-                  href="/marketplace"
-                  className="text-black font-semibold font-instrument-sans"
-                >
-                  Marketplace
-                </Link>
-              </nav>
-
-              <div className="flex items-center justify-center gap-2 bg-gray-50 px-3 py-2 rounded-lg border border-gray-200">
+            <div className="space-y-4 pt-4 border-t border-[var(--border)]">
+              <div className="flex items-center justify-center gap-1.5 sm:gap-2 bg-gray-50 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg border border-[var(--border)]">
                 <div className="flex items-center gap-1">
-                  <SiBitcoin className="w-5 h-5 text-orange-500" />
-                  <span className="font-semibold text-black font-ibm-plex-mono">BTC</span>
+                  <SiBitcoin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <span className="font-semibold text-black font-ibm-plex-mono text-xs sm:text-sm">
+                    BTC
+                  </span>
                 </div>
-                <span className="text-gray-400">/</span>
+                <span className="text-gray-400 text-xs sm:text-sm">/</span>
                 <div className="flex items-center gap-1">
-                  <SiTether className="w-5 h-5 text-green-500" />
-                  <span className="font-semibold text-black font-ibm-plex-mono">USDT</span>
+                  <SiTether className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <span className="font-semibold text-black font-ibm-plex-mono text-xs sm:text-sm">
+                    USDT
+                  </span>
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-400">Balance:</span>
-                  <span className="text-lg font-semibold text-white font-ibm-plex-mono">
+                  <span className="text-xs sm:text-sm text-[var(--muted-foreground)]">
+                    Balance:
+                  </span>
+                  <span className="text-sm sm:text-base font-semibold text-black font-ibm-plex-mono">
                     {balanceLoading
                       ? "Loading..."
                       : `$${totalBalance.toLocaleString()}`}
@@ -321,7 +284,9 @@ const Marketplace = () => {
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm text-gray-600">Timeframe:</span>
+                  <span className="text-xs sm:text-sm text-[var(--muted-foreground)]">
+                    Timeframe:
+                  </span>
                   <IntervalSelector
                     selectedInterval={selectedInterval}
                     onIntervalChange={setSelectedInterval}
@@ -330,12 +295,13 @@ const Marketplace = () => {
                 </div>
 
                 <div className="pt-2">
-                  <button
+                  <Button
+                    size="sm"
                     onClick={() => setIsDepositModalOpen(true)}
-                    className="w-full text-white text-sm px-4 py-3 rounded-4xl font-medium transition-colors hover:bg-gray-800"
+                    className="w-full text-xs sm:text-sm"
                   >
                     Deposit
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

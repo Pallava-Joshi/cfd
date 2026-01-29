@@ -22,7 +22,6 @@ export const useCreateOrder = () => {
             toast.success('Order created successfully');
         },
         onError: (error: any) => {
-            console.error('Create order error:', error);
             const errorMessage = error?.response?.data?.message || error?.response?.data?.error || 'Create order failed';
             toast.error(errorMessage);
         }
@@ -58,7 +57,6 @@ export const useCloseOrder = () => {
             toast.success('Order closed successfully');
         },
         onError: (error: any) => {
-            console.error('Close order error:', error);
             toast.error(error?.response?.data?.error || 'Close order failed');
         }
     })

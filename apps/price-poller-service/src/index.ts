@@ -46,7 +46,7 @@ ws.on("message", async (message) => {
       "engine-stream",
       "*",
       "data",
-      JSON.stringify({ kind: "price-update", payload: data })
+      JSON.stringify({ kind: "price-update", payload: data }),
     );
     // console.log(data);
   } catch (e) {

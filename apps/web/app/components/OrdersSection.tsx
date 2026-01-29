@@ -87,8 +87,8 @@ const OrdersSection: React.FC = () => {
           const price = parseFloat(parsed.data.p);
           tradeMap.set(symbol, price);
         }
-      } catch (error) {
-        console.error("Error parsing websocket message:", error);
+      } catch {
+        // Skip invalid message
       }
     });
 

@@ -23,7 +23,7 @@ const Header = () => {
         <Link href="/" className="flex items-center space-x-2">
           <div className="w-2 h-2 bg-black rounded-full"></div>
           <span className="text-xl font-semibold font-ibm-plex-mono">
-            100xness
+            MarginX
           </span>
         </Link>
 
@@ -66,7 +66,7 @@ const Header = () => {
           )}
         </div>
 
-        <button 
+        <button
           className="md:hidden p-2 z-50 relative"
           onClick={toggleMobileMenu}
           aria-label="Toggle mobile menu"
@@ -104,8 +104,8 @@ const Header = () => {
               href="/"
               onClick={closeMobileMenu}
               className={`text-lg font-instrument-sans transition-colors ${
-                pathname === "/" 
-                  ? "font-bold text-black" 
+                pathname === "/"
+                  ? "font-bold text-black"
                   : "text-gray-700 hover:text-black"
               }`}
             >
@@ -115,8 +115,8 @@ const Header = () => {
               href="/docs"
               onClick={closeMobileMenu}
               className={`text-lg font-instrument-sans transition-colors ${
-                pathname === "/docs" 
-                  ? "font-bold text-black" 
+                pathname === "/docs"
+                  ? "font-bold text-black"
                   : "text-gray-700 hover:text-black"
               }`}
             >
@@ -126,14 +126,14 @@ const Header = () => {
               href="/marketplace"
               onClick={closeMobileMenu}
               className={`text-lg font-instrument-sans transition-colors ${
-                pathname === "/marketplace" 
-                  ? "font-bold text-black" 
+                pathname === "/marketplace"
+                  ? "font-bold text-black"
                   : "text-gray-700 hover:text-black"
               }`}
             >
               Marketplace
             </Link>
-            
+
             <div className="pt-6 border-t border-gray-200">
               {isAuthenticated ? (
                 <button

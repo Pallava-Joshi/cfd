@@ -6,7 +6,6 @@ export const candlesService = {
             const response = await publicAxios.get(`/candles?ts=${timeframe}&startTime=${startTime}&endTime=${endTime}&asset=${asset}`)
             return response.data.data;
         } catch (error) {
-            console.error('Error fetching candles:', error);
             throw error;
         }
     },

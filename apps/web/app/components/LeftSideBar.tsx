@@ -78,10 +78,6 @@ const TickerItem: React.FC<TickerItemProps> = ({
 const LeftSideBar: React.FC = () => {
   const { messages, orderBook, isConnected } = useWs();
 
-  React.useEffect(() => {
-    console.log("LeftSideBar orderBook state:", orderBook);
-  }, [orderBook]);
-
   const symbolData = React.useMemo(() => {
     const dataMap = new Map<string, BackpackTradeData>();
 
@@ -91,8 +87,8 @@ const LeftSideBar: React.FC = () => {
         if (parsed.data && parsed.data.s) {
           dataMap.set(parsed.data.s, parsed);
         }
-      } catch (error) {
-        console.error("Error parsing websocket message:", error);
+      } catch {
+        // Skip invalid message
       }
     });
 
@@ -156,16 +152,8 @@ const LeftSideBar: React.FC = () => {
                 orderBook.symbol === data.data.s &&
                 orderBook.bids?.length > 0
               ) {
-                const bid = parseFloat(orderBook.bids[0]?.[0] || "0");
-                console.log(
-                  "Getting best bid:",
-                  bid,
-                  "from orderbook:",
-                  orderBook.bids[0],
-                );
-                return bid;
+                return parseFloat(orderBook.bids[0]?.[0] || "0");
               }
-              console.log("No bid data available, orderBook:", orderBook);
               return null;
             };
 
@@ -175,16 +163,8 @@ const LeftSideBar: React.FC = () => {
                 orderBook.symbol === data.data.s &&
                 orderBook.asks?.length > 0
               ) {
-                const ask = parseFloat(orderBook.asks[0]?.[0] || "0");
-                console.log(
-                  "Getting best ask:",
-                  ask,
-                  "from orderbook:",
-                  orderBook.asks[0],
-                );
-                return ask;
+                return parseFloat(orderBook.asks[0]?.[0] || "0");
               }
-              console.log("No ask data available, orderBook:", orderBook);
               return null;
             };
 

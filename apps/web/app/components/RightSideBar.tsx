@@ -68,8 +68,8 @@ const RightSideBar: React.FC<RightSideBarProps> = ({ selectedSymbol }) => {
                     latestTrade = parsed;
                     break;
                 }
-            } catch (error) {
-                console.error('Error parsing websocket message:', error);
+            } catch {
+                // Skip invalid message
             }
         }
 

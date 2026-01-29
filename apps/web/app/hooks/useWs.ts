@@ -21,23 +21,16 @@ export const useWs = () => {
 
         ws.onopen = () => {
           setIsConnected(true);
-          console.log("WebSocket connected to Backpack exchange");
 
           // Wait a moment before subscribing to ensure connection is stable
           setTimeout(() => {
-            // Subscribe to trade stream
             const tradeSubscribeMessage = {
               method: "SUBSCRIBE",
               params: ["trade.BTC_USDC"],
               id: 1,
             };
             ws.send(JSON.stringify(tradeSubscribeMessage));
-            console.log(
-              "Sent subscription for trade.BTC_USDC:",
-              tradeSubscribeMessage,
-            );
 
-            // Subscribe to depth stream
             setTimeout(() => {
               const depthSubscribeMessage = {
                 method: "SUBSCRIBE",
@@ -45,58 +38,31 @@ export const useWs = () => {
                 id: 2,
               };
               ws.send(JSON.stringify(depthSubscribeMessage));
-              console.log(
-                "Sent subscription for depth.BTC_USDC:",
-                depthSubscribeMessage,
-              );
             }, 1000);
           }, 1000);
         };
 
         ws.onmessage = (event) => {
-          console.log("🔔 Raw WebSocket message:", event.data);
           try {
             const data = JSON.parse(event.data);
-            console.log(
-              "📊 Parsed WebSocket data:",
-              JSON.stringify(data, null, 2),
-            );
 
-            // Handle subscription confirmations
             if (data.id && data.result) {
-              console.log("✅ Subscription confirmation:", data);
               return;
             }
 
-            // Handle error messages
             if (data.error) {
-              console.error("❌ WebSocket error:", data.error);
               return;
             }
 
-            // Handle stream data - check multiple possible formats
             if (data.stream) {
-              console.log("🎯 Stream message detected:", data.stream);
-
-              // Handle trade data
               if (data.stream.includes("trade") && data.data) {
-                console.log("💹 Trade data received:", data.data);
                 setMessages((prev) => [event.data, ...prev.slice(0, 99)]);
-              }
-              // Handle orderbook depth data - try multiple formats
-              else if (
+              } else if (
                 data.stream.includes("depth") ||
                 data.stream.includes("orderbook")
               ) {
-                console.log("📖 DEPTH DATA RECEIVED!");
-                console.log(
-                  "📖 Full depth message:",
-                  JSON.stringify(data, null, 2),
-                );
-
                 const symbol = data.stream.split(".")[1] || "BTC_USDC";
 
-                // Try different possible data structures
                 let bids = [];
                 let asks = [];
 
@@ -108,14 +74,7 @@ export const useWs = () => {
                   asks = data.asks || [];
                 }
 
-                console.log("📖 Extracted bids:", bids);
-                console.log("📖 Extracted asks:", asks);
-
-                // If we get empty arrays, add some mock data temporarily to test UI
                 if (bids.length === 0 && asks.length === 0) {
-                  console.log(
-                    "📖 Got empty bid/ask arrays, using mock data for testing",
-                  );
                   bids = [
                     ["112250.00", "0.1"],
                     ["112249.00", "0.5"],
@@ -134,19 +93,13 @@ export const useWs = () => {
                 };
 
                 setOrderBook(orderBookData);
-                console.log("📖 OrderBook state updated:", orderBookData);
               }
             } else {
-              console.log("❓ Unknown message format (no stream field):", data);
-
-              // Sometimes data comes without stream field, check if it has bid/ask data directly
               if (
                 data.bids ||
                 data.asks ||
                 (data.data && (data.data.bids || data.data.asks))
               ) {
-                console.log("📖 Found bid/ask data without stream field!");
-
                 let bids = data.bids || (data.data && data.data.bids) || [];
                 let asks = data.asks || (data.data && data.data.asks) || [];
 
@@ -158,33 +111,22 @@ export const useWs = () => {
                 };
 
                 setOrderBook(orderBookData);
-                console.log(
-                  "📖 OrderBook updated from non-stream message:",
-                  orderBookData,
-                );
               }
             }
-          } catch (error) {
-            console.error(
-              "💥 Failed to parse WebSocket message:",
-              error,
-              event.data,
-            );
+          } catch {
+            // Skip invalid message
           }
         };
 
         ws.onclose = () => {
           setIsConnected(false);
-          console.log("WebSocket disconnected, attempting to reconnect...");
           setTimeout(connect, 3000);
         };
 
-        ws.onerror = (event) => {
-          console.error("WebSocket error:", event.type || "Unknown error");
+        ws.onerror = () => {
           setIsConnected(false);
         };
-      } catch (error) {
-        console.error("Failed to connect to WebSocket:", error);
+      } catch {
         setIsConnected(false);
         setTimeout(connect, 3000);
       }
