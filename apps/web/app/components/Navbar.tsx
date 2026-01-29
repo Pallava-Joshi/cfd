@@ -15,9 +15,35 @@ const NAV_LINKS = [
 
 const SCROLL_THRESHOLD = 24;
 
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <span className="relative inline-flex h-5 w-5 flex-col items-center justify-center gap-1">
+      <span
+        className={cn(
+          "block h-0.5 w-5 origin-center bg-current transition-all duration-200",
+          open ? "translate-y-1.5 rotate-45" : "translate-y-0 rotate-0",
+        )}
+      />
+      <span
+        className={cn(
+          "block h-0.5 w-5 bg-current transition-all duration-200",
+          open ? "opacity-0 scale-x-0" : "opacity-100 scale-x-100",
+        )}
+      />
+      <span
+        className={cn(
+          "block h-0.5 w-5 origin-center bg-current transition-all duration-200",
+          open ? "-translate-y-1.5 -rotate-45" : "translate-y-0 rotate-0",
+        )}
+      />
+    </span>
+  );
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isLoading: userLoading, logoutMutation } = useAuth();
 
   const onScroll = useCallback(() => {
@@ -32,6 +58,10 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [onScroll]);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <header
       className={cn(
@@ -41,9 +71,9 @@ export function Navbar() {
     >
       <div
         className={cn(
-          "min-h-[52px] sm:min-h-[58px] md:min-h-[62px] w-full max-w-[1260px] mx-auto grid grid-cols-[1fr_auto_1fr] sm:grid-cols-[auto_1fr_auto] items-center gap-1.5 sm:gap-3 md:gap-4 lg:gap-6 px-2.5 sm:px-4 md:px-6 rounded-xl sm:rounded-2xl",
+          "min-h-[52px] sm:min-h-[58px] md:min-h-[62px] w-full max-w-[1260px] mx-auto flex flex-row md:grid md:grid-cols-[auto_1fr_auto] items-center gap-1.5 sm:gap-3 md:gap-4 lg:gap-6 px-2.5 sm:px-4 md:px-6 rounded-xl sm:rounded-2xl",
           "transition-[background-color,border-color] duration-300 ease-out",
-          scrolled
+          scrolled || mobileMenuOpen
             ? "bg-white border border-[var(--border)]"
             : "bg-transparent border border-transparent",
         )}
@@ -62,8 +92,8 @@ export function Navbar() {
           </div>
         </Link>
 
-        {/* Column 2: Nav links + GitHub icon */}
-        <nav className="hidden sm:flex flex-1 items-center justify-center min-w-0 gap-2 sm:gap-3 md:gap-4 lg:gap-6 text-[12px] sm:text-[13px] md:text-[15px]">
+        {/* Column 2: Nav links + GitHub (desktop only) */}
+        <nav className="hidden md:flex flex-1 items-center justify-center min-w-0 gap-2 sm:gap-3 md:gap-4 lg:gap-6 text-[12px] sm:text-[13px] md:text-[15px]">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -97,48 +127,139 @@ export function Navbar() {
           </a>
         </nav>
 
-        {/* Column 3: Auth CTAs */}
-        <div className="flex items-center justify-end gap-1.5 sm:gap-2 md:gap-4 min-w-0 flex-shrink-0 text-[12px] sm:text-[13px] md:text-[15px]">
+        {/* Spacer on mobile so hamburger stays rightmost */}
+        <div className="flex-1 min-w-0 md:hidden" aria-hidden />
+
+        {/* Column 3: Auth CTAs (desktop) / Hamburger (mobile) */}
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2 md:gap-4 min-w-0 flex-shrink-0 text-[12px] sm:text-[13px] md:text-[15px] md:justify-self-end">
+          <div className="hidden md:flex items-center gap-1.5 sm:gap-2 md:gap-4">
+            {userLoading ? (
+              <span className="text-[var(--muted-foreground)]/60 shrink-0">
+                …
+              </span>
+            ) : user ? (
+              <>
+                <Link
+                  href="/marketplace"
+                  className="shrink-0 whitespace-nowrap text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                >
+                  Trade
+                </Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => logoutMutation.mutate()}
+                  className="shrink-0 px-3 sm:px-4"
+                >
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="shrink-0 whitespace-nowrap text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link href="/register" className="shrink-0">
+                  <Button
+                    size="sm"
+                    className="whitespace-nowrap px-2.5 sm:px-3 md:px-4"
+                  >
+                    Get started
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((o) => !o)}
+            className="md:hidden flex items-center justify-center p-2 -mr-2 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/10 transition-colors"
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            <MenuIcon open={mobileMenuOpen} />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile menu panel */}
+      <div
+        className={cn(
+          "md:hidden absolute left-4 right-4 top-full mt-1 rounded-2xl border border-[var(--border)] bg-white shadow-lg overflow-hidden transition-all duration-200 ease-out",
+          mobileMenuOpen
+            ? "opacity-100 visible translate-y-0"
+            : "opacity-0 invisible -translate-y-2 pointer-events-none",
+        )}
+      >
+        <nav className="flex flex-col py-2">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "px-4 py-3 text-[15px] transition-colors",
+                pathname === link.href
+                  ? "text-[var(--foreground)] font-medium bg-[var(--muted)]/10"
+                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/5",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <a
+            href="https://github.com/pallava-joshi/cfd"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View on GitHub"
+            className="px-4 py-3 text-[15px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/5 transition-colors flex items-center gap-2"
+          >
+            GitHub
+          </a>
+          <div className="border-t border-[var(--border)] my-2" />
           {userLoading ? (
-            <span className="text-[var(--muted-foreground)]/60 shrink-0">
-              …
-            </span>
+            <div className="px-4 py-3 text-[var(--muted-foreground)]/60">…</div>
           ) : user ? (
             <>
               <Link
                 href="/marketplace"
-                className="shrink-0 whitespace-nowrap text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 text-[15px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/5"
               >
                 Trade
               </Link>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => logoutMutation.mutate()}
-                className="shrink-0 px-3 sm:px-4"
+              <button
+                type="button"
+                onClick={() => {
+                  logoutMutation.mutate();
+                  setMobileMenuOpen(false);
+                }}
+                className="px-4 py-3 text-left text-[15px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/5 w-full"
               >
                 Sign out
-              </Button>
+              </button>
             </>
           ) : (
             <>
               <Link
                 href="/login"
-                className="shrink-0 whitespace-nowrap text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 text-[15px] text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--muted)]/5"
               >
                 Sign in
               </Link>
-              <Link href="/register" className="shrink-0">
-                <Button
-                  size="sm"
-                  className="whitespace-nowrap px-2.5 sm:px-3 md:px-4"
-                >
-                  Get started
-                </Button>
+              <Link
+                href="/register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="mx-4 mt-2 mb-3"
+              >
+                <Button className="w-full py-3">Get started</Button>
               </Link>
             </>
           )}
-        </div>
+        </nav>
       </div>
     </header>
   );

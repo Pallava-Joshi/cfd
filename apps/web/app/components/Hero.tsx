@@ -6,9 +6,9 @@ const Hero = () => {
   return (
     <section className="min-h-screen flex items-center justify-center px-4 pt-20">
       {/* Paper strip between vertical lines (1280px = same as line spacing) */}
-      <div className="relative overflow-hidden bg-white w-full max-w-[1280px] mx-auto min-h-[calc(100vh-5rem)] flex items-center justify-center py-12">
+      <div className="relative overflow-hidden bg-[#F4F4F4] w-full max-w-[1280px] mx-auto min-h-[calc(100vh-5rem)] flex items-center justify-center py-12">
         <div
-          className="absolute -inset-[20px] z-0 bg-[url('/images/paper_airplane_send_with_dotted_lines.jpg')] bg-center bg-no-repeat [background-size:90%]"
+          className="absolute -inset-[20px] z-0 bg-[#F4F4F4] bg-[url('/images/paper_airplane_send_with_dotted_lines.jpg')] bg-center bg-no-repeat [background-size:90%]"
           aria-hidden
         />
         <div
@@ -19,7 +19,7 @@ const Hero = () => {
             boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
           }}
         >
-          <div className="max-w-5xl mx-auto text-center px-8 sm:px-12 py-20 md:py-32 w-full">
+          <div className="max-w-6xl mx-auto text-center px-10 sm:px-16 py-24 md:py-40 w-full">
             <h1 className="font-cal-sand text-4xl md:text-6xl font-medium text-black leading-tight mb-4 tracking-tight">
               Turn{" "}
               <span className="font-normal tracking-normal">
