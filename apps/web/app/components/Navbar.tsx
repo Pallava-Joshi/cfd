@@ -18,7 +18,7 @@ const SCROLL_THRESHOLD = 24;
 export function Navbar() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
-  const { data: user, isLoading: userLoading, logoutMutation } = useAuth();
+  const { user, isLoading: userLoading, logoutMutation } = useAuth();
 
   const onScroll = useCallback(() => {
     setScrolled(
